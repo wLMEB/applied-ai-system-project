@@ -1,3 +1,171 @@
+# Music AI Playlist Assistant
+
+## Title and Summary
+This project extends my original **Music Recommender Simulation** from Modules 1-3 into an applied AI system. The original project used a content-based scoring formula to rank songs from a small catalog based on structured user preferences such as genre, mood, energy, valence, and acousticness.
+
+The new version adds a retrieval-based AI workflow. Instead of requiring a hand-filled profile, the system now accepts a free-form request, interprets it into preferences, retrieves relevant songs from the catalog, applies guardrails, and produces a grounded recommendation response based only on the retrieved evidence.
+
+## Base Project and Original Scope
+**Original project:** Music Recommender Simulation
+
+**Original goal and capabilities:** The first version simulated how a streaming app might recommend songs using content-based filtering. It loaded songs from a CSV file, scored each song against a user profile, ranked the best matches, and explained why each recommendation was selected.
+
+This repository now keeps that original ranking engine and extends it with a more rubric-aligned AI system layer on top.
+
+## New AI Feature
+The substantial new AI feature is a **retrieval-based assistant** integrated into the main application logic.
+
+The assistant now:
+- accepts a natural-language request such as "Give me chill acoustic music from the 2010s for studying"
+- extracts structured preference signals from that request
+- retrieves and re-ranks songs from the catalog
+- generates a grounded recommendation response using only retrieved songs
+- returns confidence and guardrail notes alongside the answer
+
+This changes the system behavior in a meaningful way because retrieval and request interpretation now drive the output, rather than only a manually constructed user profile.
+
+## Architecture Overview
+The system has five main components:
+- `CLI demo` in `src/phase1_demo.py`
+- `Request parser and AI assistant` in `src/assistant.py`
+- `Retriever/ranker` in `src/recommender.py`
+- `Song catalog` in `data/songs.csv`
+- `Tests and reliability checks` in `tests/`
+
+## Architecture Diagram
+```text
+User Request
+    |
+    v
+CLI Demo / App Entry Point
+    |
+    v
+MusicAIAssistant.parse_request()
+    |
+    |-- extracts genre / mood / decade / energy / acoustic hints
+    |-- computes confidence
+    v
+MusicAIAssistant._retrieve_candidates()
+    |
+    v
+recommend_songs() in recommender.py
+    |
+    |-- scores every song in data/songs.csv
+    |-- applies ranking + diversity logic
+    v
+Retrieved Song Candidates
+    |
+    |-- guardrail check verifies grounded output
+    v
+Grounded Recommendation Response
+    |
+    v
+User sees recommendations, confidence, and guardrail notes
+
+Tests / Human Review
+    |
+    |-- pytest checks parsing, retrieval, grounding, warnings
+    |-- human reviews sample outputs in the demo
+```
+
+## Setup Instructions
+### 1. Create a virtual environment
+```bash
+python -m venv .venv
+```
+
+### 2. Activate the environment
+Windows:
+```bash
+.venv\Scripts\activate
+```
+
+Mac/Linux:
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+## How to Run the System
+Run the original recommender demo:
+```bash
+python -m src.main
+```
+
+Run the new applied AI demo:
+```bash
+python -m src.phase1_demo
+```
+
+Run tests:
+```bash
+pytest -q
+```
+
+## Sample Interactions
+### Example 1
+**Input**
+```text
+I want happy pop for a morning commute with high energy.
+```
+
+**Output summary**
+- Top recommendation: `Sunrise City` by `Neon Echo`
+- Confidence: `0.70`
+- Guardrail result: passed
+
+### Example 2
+**Input**
+```text
+Give me chill acoustic music from the 2010s for studying.
+```
+
+**Output summary**
+- Top recommendation: `Library Rain` by `Paper Lanterns`
+- Confidence: `0.85`
+- Guardrail result: passed
+
+### Example 3
+**Input**
+```text
+I need intense workout music with high energy.
+```
+
+**Output summary**
+- Top recommendation: `Storm Runner` by `Voltline`
+- Confidence: `0.55`
+- Guardrail result: passed
+
+## Reliability, Evaluation, and Guardrails
+The project includes:
+- input validation for empty queries and invalid recommendation parameters
+- confidence scoring based on extracted signals
+- guardrail warnings for vague requests
+- a guardrail check that verifies important request constraints in retrieved results
+- automated tests for parsing, retrieval, grounding, and warning behavior
+
+### Current testing summary
+- `5/5` tests pass with `pytest -q`
+- the demo runs end-to-end for three example requests
+- guardrail output is visible in the demo for human review
+
+## Reflection on AI Collaboration and System Design
+I used AI during development for planning, debugging, and restructuring the project to match the applied-AI rubric more directly.
+
+One helpful AI suggestion was to convert the original recommender into a retrieval-based assistant that accepts natural-language requests and produces grounded responses. One flawed AI suggestion was assuming the assignment’s wording about "phase 1" without checking the updated instruction file carefully enough.
+
+## Limitations, Risks, and Future Improvements
+- The catalog is small, so recommendation quality is limited by sparse data.
+- The parser is keyword-based and can miss nuance.
+- The confidence score is heuristic rather than learned.
+- A future version could add embeddings, multi-source retrieval, and a larger evaluation harness.
+
+---
+
 # Music Recommender Simulation
 
 ## Project Summary

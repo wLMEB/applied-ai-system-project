@@ -1,6 +1,10 @@
 import csv
+import logging
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass, field
+
+
+LOGGER = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Ranking mode weight tables (stretch: multiple ranking strategies)
@@ -127,6 +131,7 @@ def load_songs(csv_path: str) -> List[Dict]:
                 "speechiness":      float(row.get("speechiness", 0.05)),
                 "liveness":         float(row.get("liveness", 0.1)),
             })
+    LOGGER.info("Loaded songs", extra={"csv_path": csv_path, "song_count": len(songs)})
     return songs
 
 
@@ -197,6 +202,11 @@ def recommend_songs(
     When diversity=True an artist-diversity penalty is applied so the same
     artist cannot dominate the top-k list (stretch: fairness/anti-filter-bubble).
     """
+    if k <= 0:
+        raise ValueError("k must be greater than 0")
+    if not songs:
+        raise ValueError("songs must not be empty")
+
     # Score every song
     scored = []
     for song in songs:
@@ -229,4 +239,8 @@ def recommend_songs(
 
     # Re-sort after penalty adjustments
     selected.sort(key=lambda x: x[1], reverse=True)
+    LOGGER.info(
+        "Generated recommendations",
+        extra={"mode": mode, "k": k, "diversity": diversity, "candidate_count": len(selected)},
+    )
     return selected[:k]
